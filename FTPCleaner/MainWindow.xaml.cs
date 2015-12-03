@@ -17,19 +17,14 @@ using System.Windows.Shapes;
 
 namespace FTPCleaner
 {
-    public class Output
-    {
-        public bool Result { get; set; }
-        public string[] FileNames { get; set; }
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        private string Username { get; set; }
-        private string Password { get; set; }
+        private DefinedTimeInterval FileTimeout = new DefinedTimeInterval();
+
+        private OperationsAsync Operations = new OperationsAsync();
 
         public MainWindow()
         {
@@ -41,59 +36,43 @@ namespace FTPCleaner
             switch (((Button)sender).Name)
             {
                 case "Start":
-                    StartProcess(new Uri("ftp://leonidf.byethost5.com/public_html/webcam"));
+                    StartProcess();
                     break;
             }
         }
 
-        private async void StartProcess(Uri uri)
+        private async void StartProcess()
         {
-            Username = "leonidfb";
-            Password = "fl67fe77";
-            
-            if (uri.Scheme != Uri.UriSchemeFtp)
+            // Init params
+            FileTimeout.init(0, 1);
+            Operations.Username = "leonidfb";
+            Operations.Password = "fl67fe77";
+            Operations.FtpUri   = new Uri("ftp://leonidf.byethost5.com/public_html/webcam/");
+
+            // Retrieve FTP directory
+            Output output = await Operations.GetDirListAsync(Operations.FtpUri);
+            if (!output.Result)
             {
+                Console.WriteLine("GetDirListAsync is failed");
                 return;
             }
+            Console.WriteLine("output length = {0};", ((DirInfoOutput)output).FileNames.Length);
 
-            Output output = await GetDirListAsync(uri);
-            Console.WriteLine("output length = {0};", output.FileNames.Length);
-
-        }
-
-        private Task<Output> GetDirListAsync(Uri uri)
-        {
-            return Task.Run(() =>
+            // Retrive File Details
+            Uri FileName = new Uri(Operations.FtpUri, ((DirInfoOutput)output).FileNames[0]);
+            output = await Operations.GetFileDetailsAsync(FileName);
+            if (!output.Result)
             {
-                bool res = false;
-                string names = string.Empty;
+                Console.WriteLine("GetFileDetailsAsync is failed");
+                return;
+            }
+            Console.WriteLine("output result = {0}; File = {1}; Data = {2}", output.Result, FileName, ((FileInfoOutput) output).FileModifiedData);
 
-                try
-                {
-                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(uri);
-                    request.Method = WebRequestMethods.Ftp.ListDirectory;
-                    request.Credentials = new NetworkCredential(Username, Password);
+            // Check is file old
+            bool result = FileTimeout.IsOldFile(((FileInfoOutput)output).FileModifiedData);
 
-                    FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-
-                    Stream responseStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(responseStream);
-
-                    names = reader.ReadToEnd().Replace("..\r", "").Replace(".\r", "").Replace("\r", "");
-
-                    reader.Close();
-                    response.Close();
-
-                    res = true;
-
-                }
-                catch (Exception e)
-                {
-                    res = false;
-                }
-
-                return new Output() { Result = res, FileNames = (res ? names.Split('\n') : null) };
-            });
+            // Delete File from FTP
+            output = await Operations.DeleteFileAsync(FileName);
         }
     }
 }
