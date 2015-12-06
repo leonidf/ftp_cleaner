@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Controls.Ribbon;
 
 namespace FTPCleaner
 {
@@ -71,6 +72,33 @@ namespace FTPCleaner
 
             // Delete File from FTP
             output = await Operations.DeleteFileAsync(FileName);
+        }
+
+        private void OnApplicationMenuItem(object sender, RoutedEventArgs e)
+        {
+            var ApplicationMenu = sender as RibbonApplicationMenuItem;
+
+            switch (ApplicationMenu.Name)
+            {
+                case "WebSite":
+                    break;
+
+                case "UpdateApp":
+                    break;
+
+                case "AppExit":
+                    this.Close();
+                    break;
+
+                default:
+ //                   MessageBox.Show("Wrong control is selected: " + ApplicationMenu.Name, Properties.Resources.ApplicationName, MessageBoxButton.OK, MessageBoxImage.Error);
+                    break;
+            }
+        }
+
+        private void OnApplicationHelpButton(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -1,13 +1,30 @@
-﻿<Window x:Class="FTPCleaner.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FTPCleaner"
+        x:Class="FTPCleaner.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        <Button x:Name="Start" Content="Start" HorizontalAlignment="Left" Margin="428,43,0,0" VerticalAlignment="Top" Width="75" ToolTip="Start FTP Cleaner Process" Click="OnButtonClick"/>
-
+        Title="MainWindow" Height="472.93" Width="525">
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="26" />
+        </Grid.RowDefinitions>
+        <Ribbon x:Name="Ribbon" SelectedIndex="0" >
+            <Ribbon.HelpPaneContent>
+                <RibbonButton x:Name="Help" SmallImageSource="Images\help.png" Click="OnApplicationHelpButton" VerticalAlignment="Center"/>
+            </Ribbon.HelpPaneContent>
+            <Ribbon.ApplicationMenu>
+                <RibbonApplicationMenu SmallImageSource="Images\home.png" >
+                    <RibbonApplicationMenuItem Header="Visit Home Web Site" x:Name="WebSite" ImageSource="Images\web_site.png" Click="OnApplicationMenuItem" />
+                    <RibbonApplicationMenuItem Header="Check for Update" x:Name="AppUpdate" ImageSource="Images\app_update.png" Click="OnApplicationMenuItem" />
+                    <RibbonApplicationMenuItem Header="Exit" x:Name="AppExit" ImageSource="Images\exit.png" Click="OnApplicationMenuItem" />
+                </RibbonApplicationMenu>
+            </Ribbon.ApplicationMenu>
+        </Ribbon>
+        <Button x:Name="Start" Content="Start" HorizontalAlignment="Left" Margin="415,222,0,0" VerticalAlignment="Top" Width="75" ToolTip="Start FTP Cleaner Process" Click="OnButtonClick" Height="25" Grid.Row="1"/>
     </Grid>
 </Window>
