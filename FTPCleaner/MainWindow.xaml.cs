@@ -25,6 +25,8 @@ namespace FTPCleaner
 
         private OperationsAsync Operations = new OperationsAsync();
 
+        private Configuration AppConfiguration = new Configuration();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -43,13 +45,19 @@ namespace FTPCleaner
         private async void StartProcess()
         {
             // Init params
-            FileTimeout.init(0, 1);
-            Operations.Username = "leonidfb";
-            Operations.Password = "fl67fe77";
-            Operations.FtpUri   = new Uri("ftp://leonidf.byethost5.com/public_html/webcam/");
+            FileTimeout.Init(0, 1);
+            AppConfiguration.Username = "leonidfb";
+            AppConfiguration.Password = "fl67fe77";
+            AppConfiguration.FtpUri   = new Uri("ftp://leonidf.byethost5.com/public_html/webcam/");
 
             // Retrieve FTP directory
-            Output output = await Operations.GetDirListAsync(Operations.FtpUri);
+            if(Operations.IsRunning)
+            {
+                Console.WriteLine("Process is running!");
+                return;
+            }
+
+            Output output = await Operations.GetDirListAsync(AppConfiguration.FtpUri, AppConfiguration.Username, AppConfiguration.Password);
             if (!output.Result)
             {
                 Console.WriteLine("GetDirListAsync is failed");
@@ -58,8 +66,8 @@ namespace FTPCleaner
             Console.WriteLine("output length = {0};", ((DirInfoOutput)output).FileNames.Length);
 
             // Retrive File Details
-            Uri FileName = new Uri(Operations.FtpUri, ((DirInfoOutput)output).FileNames[0]);
-            output = await Operations.GetFileDetailsAsync(FileName);
+            Uri FileName = new Uri(AppConfiguration.FtpUri, ((DirInfoOutput)output).FileNames[0]);
+            output = await Operations.GetFileDetailsAsync(FileName, AppConfiguration.Username, AppConfiguration.Password);
             if (!output.Result)
             {
                 Console.WriteLine("GetFileDetailsAsync is failed");
@@ -71,7 +79,7 @@ namespace FTPCleaner
             bool result = FileTimeout.IsOldFile(((FileInfoOutput)output).FileModifiedData);
 
             // Delete File from FTP
-            output = await Operations.DeleteFileAsync(FileName);
+            output = await Operations.DeleteFileAsync(FileName, AppConfiguration.Username, AppConfiguration.Password);
         }
 
         private void OnApplicationMenuItem(object sender, RoutedEventArgs e)

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace FTPCleaner
 {
+    /// <summary>
+    /// Async Output classes
+    /// </summary>
     public class Output
     {
         public bool Result { get; set; }
